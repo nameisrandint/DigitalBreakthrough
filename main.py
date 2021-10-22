@@ -1,6 +1,8 @@
+from example_code import example
+
 
 def main():
-    pass
+    example()
 
 
 if __name__ == '__main__':
