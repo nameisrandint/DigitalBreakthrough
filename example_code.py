@@ -10,12 +10,24 @@ def example():
     }
 
     # Solver initialization
-    s = Solver(mode="remote:simcim", params=PARAMS)
+    solver = Solver(mode="remote:gurobi", params=PARAMS)
 
     # QUBO matrix definition
-    Q = np.random.randn(5, 5)
+    QUBOmatrix = np.matrix([
+        [0, 13, 14, 16, 14],
+        [13, 0,  3,  4, 12],
+        [14, 3,  0,  3, 15],
+        [16, 4,  3,  0, 16],
+        [14, 12, 15, 16, 0]
+    ])
+
+    def trycallback(*args):
+        for elem in args:
+            print(elem)
+
+    randomMatrix = np.random.randn(5, 5)
 
     # Getting results
-    spins, energy = s.solve_qubo(Q, timeout=30)
+    spins, energy = solver.solve_qubo(randomMatrix, timeout=600, target=1000, callback=trycallback(), enable_cache=False)
 
-    print(spins, energy, end='\n')
+    print(QUBOmatrix, spins, energy, sep='\n')
