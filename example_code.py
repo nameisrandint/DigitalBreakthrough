@@ -28,6 +28,6 @@ def example():
     randomMatrix = np.random.randn(5, 5)
 
     # Getting results
-    spins, energy = solver.solve_qubo(randomMatrix, timeout=600, target=1000, callback=trycallback(), enable_cache=False)
+    spins, energy = solver.solve_qubo(QUBOmatrix, timeout=600, target=1000, callback=trycallback(), enable_cache=False)
 
     print(QUBOmatrix, spins, energy, sep='\n')
