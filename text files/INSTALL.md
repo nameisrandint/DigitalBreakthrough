@@ -36,4 +36,6 @@ C:\competitions\env_rosatom\Scripts\activate.bat
 ```
 pip install notebook
 pip install --index-url https://repo.qboard.tech/ qboard-client
+pip install qiskit
+pip install matplotlib
 ```
