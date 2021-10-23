@@ -13,21 +13,29 @@ def example():
     solver = Solver(mode="remote:gurobi", params=PARAMS)
 
     # QUBO matrix definition
-    QUBOmatrix = np.matrix([
+    QUBOmatrix = (-1) * np.matrix([
         [0, 13, 14, 16, 14],
         [13, 0,  3,  4, 12],
-        [14, 3,  0,  3, 15],
+        [14, 3, 0,  3, 15],
         [16, 4,  3,  0, 16],
         [14, 12, 15, 16, 0]
     ])
 
-    def trycallback(*args):
-        for elem in args:
-            print(elem)
+    testMatrix = np.matrix([
+        [-5, 2, 4, 0],
+        [2, -3, 1, 0],
+        [4, 1, -8, 5],
+        [0, 0, 5, -6]
+    ])
 
     randomMatrix = np.random.randn(5, 5)
 
-    # Getting results
-    spins, energy = solver.solve_qubo(QUBOmatrix, timeout=600, target=1000, callback=trycallback(), enable_cache=False)
+    def trycall(*args):
+        for elem in args:
+            print("elem =", elem)
+        return 123
 
+    # Getting results
+    spins, energy = solver.solve_qubo(QUBOmatrix, timeout=15, target=None, callback=trycall)
     print(QUBOmatrix, spins, energy, sep='\n')
+
