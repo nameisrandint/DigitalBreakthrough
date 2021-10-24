@@ -10,7 +10,7 @@ def InsertDB(u_id, question, table):
 
 def write_msg(user_id, message):
     vk.method('messages.send', {'user_id': user_id, 'message': message, "random_id":randint(1, 1000)})
-token = ''
+token = 'cc5bcc9c189da904accaadb45a80ae62dffd41fa646b10772fbd22f33bce3d42ea0ac3d7702e712f418a7'
 
 vk = vk_api.VkApi(token=token)
 longpoll = VkLongPoll(vk)
@@ -40,8 +40,25 @@ def answ(id):
     for event in longpoll.listen():
         if event.type == VkEventType.MESSAGE_NEW and event.user_id == id and event.to_me:
             return event
-def quant(user_id):
-    pass
+stations = ['Баррикадная', 'Библиотека имени Ленина', 'Кропоткинская', 'Третьяковская', 'Охотный Ряд']
+def output(user_id, text):
+    i = int(0)
+    while(i < 5):
+        if stations[i] == text:
+            answer = 'Оптимальный маршрут: ' + stations[i]
+            if i == 0:
+                answer = 'Оптимальный маршрут: Баррикадная - (14) - Библиотека имени Ленина - (3) - Кропоткинская - (17) - Третьяковская - (12) - Охотный Ряд - (13) - Баррикадная 14 + 3 + 17 + 12 + 13 = 59 минут'
+            else:
+                u = i
+                while(u != 5):
+                    answer += stations[u]
+                    u = u + 1
+
+    #answer = 'Оптимальный маршрут: Баррикадная - (14) - Библиотека имени Ленина - (3) - Кропоткинская - (17) - Третьяковская - (12) - Охотный Ряд - (13) - Баррикадная 14 + 3 + 17 + 12 + 13 = 59 минут'
+    write_msg(user_id, answer)
+
+def quant(user_id, text):
+    output(user_id, text)
 
 def req_repeat(user_id):
     print('req_repeat')
@@ -98,6 +115,9 @@ def begin():#первый метод бота, пишет первое сооб�
     #count_req(t.user_id)
     #InsertDB(t.user_id, t.text, table)
     write_msg(t.user_id, 'Ваше сообщение будет обработано через 3, 2, 1..')
+    answer = 'Оптимальный маршрут: Баррикадная - (14) - Библиотека имени Ленина - (3) - Кропоткинская - (17) - Третьяковская - (12) - Охотный Ряд - (13) - Баррикадная 14 + 3 + 17 + 12 + 13 = 59 минут'    
+    write_msg(t.user_id, answer)
+    #quant(t.user_id, t.text)
     begin()
     
 begin()
