@@ -1,0 +1,9 @@
+notebook
+ipykernel
+matplotlib
+networkx
+qiskit
+numpy
+pandas
+openpyxl
+PyYAML
