@@ -2,7 +2,7 @@ import os
 import shlex
 import argparse
 import logging
-from typing import Optional, Union, Dict, List
+from typing import Optional, Union, Dict, Tuple, List
 
 import yaml
 import numpy as np
@@ -28,6 +28,8 @@ class ProjConfig:
     def __init__(
             self, vk_token: str, qboard_access_key: str,
             dist_mat: Optional[Union[str, np.ndarray]] = None,
+            alpha: Optional[float] = None,
+            beta: Optional[float] = None,
             qubo_mat: Optional[Union[str, list, np.ndarray, np.matrix]] = None,
             **kwargs
     ):
@@ -39,9 +41,17 @@ class ProjConfig:
         self.qboard_access_key = qboard_access_key
         # If self.dist_mat, than it should be created randomly and self.qubo_mat should be calculated over it
         self.dist_mat: Optional[np.ndarray] = None  # distance matrix between N points
+        self.__n_stations: Optional[int] = None
+        self.alpha: Optional[float] = None
+        self.beta: Optional[float] = None
         self.qubo_mat: Optional[np.matrix] = None  # predefined Q matrix (the dist_mat will have no influence)
         if dist_mat is not None:
             self.dist_mat = self.load_dist_mat(dist_mat)
+            self.__n_stations = len(self.dist_mat)
+        if alpha is not None:
+            self.alpha = alpha
+        if beta is not None:
+            self.beta = beta
         if qubo_mat is not None:
             self.set_qubo_mat(qubo_mat)
         self.logger.debug("End init of ProjConfig")
@@ -67,23 +77,39 @@ class ProjConfig:
                             f"Available: Union[str, list, np.ndarray]")
 
     @classmethod
-    def set_qubo_mat(cls, qubo_mat: Union[str, list, np.ndarray, np.matrix]) -> np.matrix:
+    def set_qubo_mat(
+            cls,
+            qubo_mat: Union[str, list, np.ndarray, np.matrix]
+    ) -> Tuple[np.matrix, Optional[float], Optional[float]]:
+        alpha = None
+        beta = None
+
         if isinstance(qubo_mat, str):
             # Expected to be path to '.npy' file:
             with open(qubo_mat, 'rb') as f:
                 cls.logger.info(f'Loading qubo_mat from file: "{qubo_mat}"')
                 _qubo_mat = np.load(f)
-                cls.logger.debug(f'Loaded qubo_mat: {_qubo_mat}. type(qubo_mat)={type(_qubo_mat)}')
-                return _qubo_mat
+                try:
+                    alpha = float(np.load(f))
+                    cls.logger.debug(f'Loaded alpha={alpha} from: "{qubo_mat}"')
+                except Exception as e:
+                    cls.logger.warning(f'Unsuccessful loading of alpha from: "{qubo_mat}". Stayed as None', exc_info=e)
+                try:
+                    beta = np.load(f)
+                    cls.logger.debug(f'Loaded beta={beta} from: "{qubo_mat}"')
+                except Exception as e:
+                    cls.logger.warning(f'Unsuccessful loading of beta from: "{qubo_mat}". Stayed as None', exc_info=e)
+            cls.logger.debug(f'Loaded qubo_mat: {_qubo_mat}. type(qubo_mat)={type(_qubo_mat)}')
+            return _qubo_mat, alpha, beta
 
         if isinstance(qubo_mat, list):
-            return np.matrix(qubo_mat)
+            return np.matrix(qubo_mat), alpha, beta
 
         elif isinstance(qubo_mat, np.ndarray):
-            return np.matrix(qubo_mat)
+            return np.matrix(qubo_mat), alpha, beta
 
         elif isinstance(qubo_mat, np.matrix):
-            return qubo_mat
+            return qubo_mat, alpha, beta
 
         else:
             raise TypeError(f"Not supported type of qubo_mat={type(qubo_mat)}. "
